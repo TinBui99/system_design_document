@@ -1,6 +1,7 @@
-# system_design_document
+# System Design Document
 Tài liệu thiết kế hệ thống 
 > Link bài viết: https://viblo.asia/p/bai-dich-thiet-ke-he-thong-cho-hang-trieu-nguoi-dung-ByEZkA7W5Q0
+> Sách gốc: **System Design Interview (Alex Xu)**
 
 **Thiết kế hệ thống đơn (single server setup)**
 <picture>
@@ -58,4 +59,55 @@ Có thể chọn database language SQL và NoSQL
     - Scale out phù hợp vs app hơn là scale up
 - Scale out: thêm nhiều hơn 1 server vào nguồn tài nguyên
 
+Khi user truy cập vào server quá nhiều dẫn đến server bị quá tải -> connect fail đến server
+-> Cần có bộ cân bằng tải 
 
+**Bộ cân bằng tải (Load balancer)**
+<br>
+Bộ cân bằng tải (Load Balancer) phân phối đồng đều lưu lượng truy cập giữa các web server được xác định trong bộ cân bằng tải.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://images.viblo.asia/9a0cdf1d-6660-4cd6-a6e9-07058c495cb5.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://images.viblo.asia/9a0cdf1d-6660-4cd6-a6e9-07058c495cb5.png">
+  <div align="center">
+    <img style="border: 5px solid green" width="450px" alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="https://images.viblo.asia/9a0cdf1d-6660-4cd6-a6e9-07058c495cb5.png">
+</div>  
+</picture>
+Đặc điểm:
+
+- Client không được kết nối trực tiếp với các web server
+- Client chỉ được kết nối trực tiếp với load balancer thông qua IP public
+- Load balancer và các web server giao tiếp với nhau bằng các IP private trong cùng 1 mạng (không thể truy cập từ bên ngoài vào mạng này)
+- Nếu server 1 bị offline, load balancer sẽ điều hướng kết nối sang server 2. 
+
+**Bản sao cơ sở dữ liệu**
+<br>
+Bản sao cơ sở dữ liệu (database replication) thường đc dùng trong quản trị hệ thống nhiều cơ sở dữ liệu. 
+Thông thường đó là mối quan hệ giữa bản gốc (master) và bản sao (slave)
+
+- Master: hỗ trợ ghi dữ liệu (INSERT, DELETE, UPDATE)
+- Slave: lấy dữ liệu từ master + hỗ trợ đọc dữ liệu
+> Phần lớn ứng dụng đều yêu cầu truy cập đọc nhiều hơn ghi, do đó số lượng cơ sở dữ liệu slave trong hệ thống nhiều hơn cơ sở dữ liệu master.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://images.viblo.asia/438ea8d6-ea0b-4d3f-b2dc-e36cd4c84abb.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://images.viblo.asia/438ea8d6-ea0b-4d3f-b2dc-e36cd4c84abb.png">
+  <div align="center">
+    <img style="border: 5px solid green" width="450px" alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="https://images.viblo.asia/438ea8d6-ea0b-4d3f-b2dc-e36cd4c84abb.png">
+</div>  
+</picture>
+
+Lợi thế: 
+
+- Tăng hiệu suất xử lý (vì có nhiều slave được làm việc song song)
+- Backup được dữ liệu ở các Slave khác nhau
+- Tính khả dụng cao: nếu 1 DB bị lỗi vẫn có thể truy cập vào slave khác
+
+**Tổng kết**
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://images.viblo.asia/f335ddcc-462b-4eac-b749-2b528d122a92.png">
+  <source media="(prefers-color-scheme: light)" srcset="https://images.viblo.asia/f335ddcc-462b-4eac-b749-2b528d122a92.png">
+  <div align="center">
+    <img style="border: 5px solid green" width="400px" alt="Shows an illustrated sun in light mode and a moon with stars in dark mode." src="https://images.viblo.asia/f335ddcc-462b-4eac-b749-2b528d122a92.png">
+</div>  
+</picture>
+
+Để cải thiện thời gian phản hồi, ta có thể thực hiện bằng cách thêm một lớp bộ nhớ cache và chuyển nội dung tĩnh (file JavaScript / CSS / hình ảnh / video) sang CDN.
